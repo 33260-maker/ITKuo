@@ -1,4 +1,4 @@
-local KuoHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/33260-maker/ITKuo/refs/heads/main/KuoHub-GUI.lua"))()
+local KuoHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/malcompetchthong-dev/ITKuo/refs/heads/main/Librarykuohub-BETA.lua"))()
 
 local Window = KuoHub:MakeWindow({
     Title = "Kuo Hub | MM2",
@@ -1737,7 +1737,7 @@ local root = char and char:FindFirstChild("HumanoidRootPart")
 if not root then continue end  
   
 -- ❗ ปิด Fly ปกติ  
-if Flying then  
+if flying then  
 setFly(false)  
 end  
   
@@ -2567,28 +2567,6 @@ else
 	MainFrame.ClipsDescendants = true
 	MainFrame.Visible = false
 	MainFrame.Parent = ScreenGui
-
-	-- Responsive sizing: keep the standalone window inside phone/tablet screens.
-	local MainScale = Instance.new("UIScale")
-	MainScale.Name = "ResponsiveScale"
-	MainScale.Parent = MainFrame
-	local function UpdateResponsiveLayout()
-		local camera = workspace.CurrentCamera
-		if not camera then return end
-		local viewport = camera.ViewportSize
-		local scale = math.min(1, viewport.X / 490, viewport.Y / 320)
-		MainScale.Scale = math.clamp(scale, 0.62, 1)
-		if MainFrame.Position.X.Scale == 0 and MainFrame.Position.Y.Scale == 0 then
-			local pos = MainFrame.Position
-			local maxX = math.max(0, viewport.X - MainFrame.AbsoluteSize.X * MainScale.Scale)
-			local maxY = math.max(0, viewport.Y - MainFrame.AbsoluteSize.Y * MainScale.Scale)
-			MainFrame.Position = UDim2.fromOffset(math.clamp(pos.X.Offset, 0, maxX), math.clamp(pos.Y.Offset, 0, maxY))
-		end
-	end
-	UpdateResponsiveLayout()
-	if workspace.CurrentCamera then
-		workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateResponsiveLayout)
-	end
 	Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 	local UIStroke = Instance.new("UIStroke", MainFrame)
 	UIStroke.Color = Color3.fromRGB(48, 54, 61)
@@ -2611,44 +2589,6 @@ else
 	TopBar.BackgroundTransparency = 1
 	TopBar.ZIndex = 5
 	TopBar.Parent = MainFrame
-
-	-- Drag the window with mouse or touch from the top bar.
-	local dragging = false
-	local dragInput = nil
-	local dragStart = nil
-	local startPosition = nil
-	TopBar.Active = true
-	TopBar.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPosition = MainFrame.AbsolutePosition
-			dragInput = input
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then dragging = false end
-			end)
-		end
-	end)
-	TopBar.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local delta = input.Position - dragStart
-			local camera = workspace.CurrentCamera
-			if camera then
-				local viewport = camera.ViewportSize
-				local scale = MainScale.Scale
-				local px = startPosition.X + delta.X
-				local py = startPosition.Y + delta.Y
-				local maxX = math.max(0, viewport.X - MainFrame.AbsoluteSize.X * scale)
-				local maxY = math.max(0, viewport.Y - MainFrame.AbsoluteSize.Y * scale)
-				MainFrame.Position = UDim2.fromOffset(math.clamp(px, 0, maxX), math.clamp(py, 0, maxY))
-			end
-		end
-	end)
 
 	local TitleIcon = Instance.new("ImageLabel")
 	TitleIcon.Size = UDim2.new(0, 18, 0, 18)
@@ -2901,8 +2841,6 @@ local function AddChatMessage(sender, text, color)
 	MsgLabel.TextSize = 11
 	MsgLabel.TextWrapped = true
 	MsgLabel.RichText = true
-	MsgLabel.TextYAlignment = Enum.TextYAlignment.Top
-	MsgLabel.AutomaticSize = Enum.AutomaticSize.Y
 
 	if sender == "You" then
 		MsgLabel.TextColor3 = Color3.fromRGB(50, 205, 150)
@@ -3112,7 +3050,6 @@ local function FullReset(silent)
 	SetInvis(false)
 	pcall(function() setFly(false) end)
 	pcall(function() applyInvisible(false) end)
-	pcall(function() getgenv().invisible = false end)
 	pcall(function()
 		local g = getgenv()
 		g.ESP_ENABLED = false
@@ -3126,9 +3063,8 @@ local function FullReset(silent)
 		g.GunESP = false
 		g.AUTO_COIN_COLLECT = false
 		g.CHAT_ANNOUNCE = false
-		g.walkSpeed = 16
 	end)
-	AI.Speed = nil; AI.Jump = nil; AI.Spin = false; AI.FlySpeed = 50
+	AI.Speed = nil; AI.Jump = nil; AI.Spin = false
 	UpdateESP()
 	for k, c in pairs(Conn) do pcall(function() c:Disconnect() end); Conn[k] = nil end
 	local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -3326,7 +3262,6 @@ local function ProcessCode(raw)
 	if HasAny(cs, {"ปิดบิน", "unfly", "stop fly", "land"}) then
 		AI.Fly = false
 		if Conn.Fly then Conn.Fly:Disconnect(); Conn.Fly = nil end
-		pcall(function() setFly(false) end)
 		if hum then hum.PlatformStand = false end
 		infoMsg("ปิดระบบบินเรียบร้อย", "Fly disabled")
 		return
