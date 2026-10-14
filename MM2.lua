@@ -1,4 +1,4 @@
-local KuoHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/33260-maker/ITKuo/refs/heads/main/KuoHub-GUI.lua"))()
+local KuoHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/33260-maker/KuoHub-new/refs/heads/main/KuoHub-GUI.lua?token=GHSAT0AAAAAAEMLDJ564C6EWNEKQNP67RPM2WPHQJA"))()
 
 local Window = KuoHub:MakeWindow({
     Title = "Kuo Hub | MM2",
