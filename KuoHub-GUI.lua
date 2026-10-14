@@ -1577,7 +1577,7 @@ function KuoHub:MakeWindow(config)
 	local Title = Instance.new("TextLabel", Top)
 	Title.Name = "Title"
 	Title.Text = config.Title or "KuoHub"
-	Title.Size = UDim2.new(1,-100,1,0)
+	Title.Size = UDim2.new(1,-155,1,0)
 	Title.Position = UDim2.new(0,10,0,0)
 	Title.BackgroundTransparency = 1
 	Title.Font = Enum.Font.GothamBold
@@ -1646,7 +1646,181 @@ function KuoHub:MakeWindow(config)
 	Close.TextColor3 = Color3.fromRGB(255,80,80)
 	Close.Font = Enum.Font.GothamBold
 	Close.TextSize = 16
-	
+
+	-- =========================
+	-- PRESET THEME PICKER ONLY
+	-- Custom RGB Toggle + RGB sliders are intentionally NOT embedded here.
+	-- Add them separately in your own Setting tab using the companion snippet.
+	-- =========================
+	local ConfirmStroke
+	local YesBtn
+	local CustomThemeEnabled = false
+	local CustomRGB = {190, 70, 255}
+	local LastPresetPalette
+
+	local ThemeButton = Instance.new("TextButton")
+	ThemeButton.Name = "ThemeButton"
+	ThemeButton.Parent = Top
+	ThemeButton.Size = UDim2.new(0,32,1,0)
+	ThemeButton.Position = UDim2.new(1,-120,0,0)
+	ThemeButton.BackgroundColor3 = Color3.fromRGB(38,20,52)
+	ThemeButton.Text = "THEME"
+	ThemeButton.TextColor3 = Color3.fromRGB(225,135,255)
+	ThemeButton.Font = Enum.Font.GothamBold
+	ThemeButton.TextSize = 8
+	ThemeButton.AutoButtonColor = false
+	ThemeButton.ZIndex = 30
+	Instance.new("UICorner", ThemeButton).CornerRadius = UDim.new(0,7)
+	local ThemeButtonStroke = Instance.new("UIStroke", ThemeButton)
+	ThemeButtonStroke.Color = Color3.fromRGB(190,70,255)
+	ThemeButtonStroke.Thickness = 1
+
+	local ThemePicker = Instance.new("Frame")
+	ThemePicker.Name = "ThemePicker"
+	ThemePicker.Parent = Main
+	ThemePicker.AnchorPoint = Vector2.new(1,0)
+	ThemePicker.Position = UDim2.new(1,-8,0,49)
+	ThemePicker.Size = UDim2.new(0,205,0,145)
+	ThemePicker.BackgroundColor3 = Color3.fromRGB(18,18,23)
+	ThemePicker.BorderSizePixel = 0
+	ThemePicker.Visible = false
+	ThemePicker.ZIndex = 80
+	ThemePicker.ClipsDescendants = true
+	Instance.new("UICorner", ThemePicker).CornerRadius = UDim.new(0,12)
+	local ThemePickerStroke = Instance.new("UIStroke", ThemePicker)
+	ThemePickerStroke.Color = Color3.fromRGB(190,70,255)
+	ThemePickerStroke.Thickness = 1.5
+	ThemePickerStroke.Transparency = 0.12
+
+	local ThemeHeading = Instance.new("TextLabel")
+	ThemeHeading.Name = "Heading"
+	ThemeHeading.Parent = ThemePicker
+	ThemeHeading.Position = UDim2.new(0,10,0,5)
+	ThemeHeading.Size = UDim2.new(1,-20,0,22)
+	ThemeHeading.BackgroundTransparency = 1
+	ThemeHeading.Text = "PRESET THEMES"
+	ThemeHeading.TextColor3 = Color3.fromRGB(225,135,255)
+	ThemeHeading.Font = Enum.Font.GothamBold
+	ThemeHeading.TextSize = 12
+	ThemeHeading.TextXAlignment = Enum.TextXAlignment.Left
+	ThemeHeading.ZIndex = 81
+
+	local ThemeGrid = Instance.new("Frame")
+	ThemeGrid.Name = "PresetGrid"
+	ThemeGrid.Parent = ThemePicker
+	ThemeGrid.Position = UDim2.new(0,8,0,31)
+	ThemeGrid.Size = UDim2.new(1,-16,0,94)
+	ThemeGrid.BackgroundTransparency = 1
+	ThemeGrid.ZIndex = 81
+	local ThemeGridLayout = Instance.new("UIGridLayout", ThemeGrid)
+	ThemeGridLayout.CellSize = UDim2.new(0,91,0,27)
+	ThemeGridLayout.CellPadding = UDim2.new(0,5,0,5)
+	ThemeGridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+	local ThemePalettes = {
+		["Neon Purple"] = {Accent=Color3.fromRGB(190,70,255), Light=Color3.fromRGB(225,135,255), Dark=Color3.fromRGB(115,45,150), Selected=Color3.fromRGB(85,25,120), Hover=Color3.fromRGB(48,25,64), Group=Color3.fromRGB(38,20,52), Button=Color3.fromRGB(24,18,32)},
+		["Cyber Blue"] = {Accent=Color3.fromRGB(0,170,255), Light=Color3.fromRGB(120,220,255), Dark=Color3.fromRGB(0,80,150), Selected=Color3.fromRGB(0,80,140), Hover=Color3.fromRGB(15,45,65), Group=Color3.fromRGB(15,30,48), Button=Color3.fromRGB(14,22,32)},
+		["Crimson Red"] = {Accent=Color3.fromRGB(255,65,85), Light=Color3.fromRGB(255,140,150), Dark=Color3.fromRGB(145,25,40), Selected=Color3.fromRGB(130,25,40), Hover=Color3.fromRGB(65,25,35), Group=Color3.fromRGB(50,20,28), Button=Color3.fromRGB(28,16,20)},
+		["Matrix Green"] = {Accent=Color3.fromRGB(40,220,130), Light=Color3.fromRGB(130,255,185), Dark=Color3.fromRGB(20,110,70), Selected=Color3.fromRGB(15,100,55), Hover=Color3.fromRGB(20,55,40), Group=Color3.fromRGB(15,42,30), Button=Color3.fromRGB(12,24,19)},
+		["Neon Pink"] = {Accent=Color3.fromRGB(255,70,180), Light=Color3.fromRGB(255,150,220), Dark=Color3.fromRGB(145,25,95), Selected=Color3.fromRGB(125,20,85), Hover=Color3.fromRGB(65,25,50), Group=Color3.fromRGB(50,20,40), Button=Color3.fromRGB(28,15,24)},
+		["Ice White"] = {Accent=Color3.fromRGB(130,210,255), Light=Color3.fromRGB(220,245,255), Dark=Color3.fromRGB(55,105,145), Selected=Color3.fromRGB(45,85,120), Hover=Color3.fromRGB(35,50,65), Group=Color3.fromRGB(30,42,52), Button=Color3.fromRGB(17,23,29)},
+	}
+	local ActivePalette = ThemePalettes["Neon Purple"]
+	LastPresetPalette = ActivePalette
+	local function ColorKey(color)
+		return string.format("%d,%d,%d", math.floor(color.R*255+0.5), math.floor(color.G*255+0.5), math.floor(color.B*255+0.5))
+	end
+	local function ApplyThemePalette(palette)
+		local previousPalette = ActivePalette
+		local replacements = {
+			[ColorKey(Color3.fromRGB(190,70,255))] = palette.Accent,
+			[ColorKey(Color3.fromRGB(225,135,255))] = palette.Light,
+			[ColorKey(Color3.fromRGB(115,45,150))] = palette.Dark,
+			[ColorKey(Color3.fromRGB(85,25,120))] = palette.Selected,
+			[ColorKey(Color3.fromRGB(48,25,64))] = palette.Hover,
+			[ColorKey(Color3.fromRGB(38,20,52))] = palette.Group,
+			[ColorKey(Color3.fromRGB(24,18,32))] = palette.Button,
+			[ColorKey(Color3.fromRGB(24,24,32))] = palette.Button,
+			[ColorKey(Color3.fromRGB(120,0,200))] = palette.Selected,
+			[ColorKey(Color3.fromRGB(170,0,255))] = palette.Accent,
+			[ColorKey(Color3.fromRGB(0,200,255))] = palette.Light,
+			[ColorKey(previousPalette.Accent)] = palette.Accent,
+			[ColorKey(previousPalette.Light)] = palette.Light,
+			[ColorKey(previousPalette.Dark)] = palette.Dark,
+			[ColorKey(previousPalette.Selected)] = palette.Selected,
+			[ColorKey(previousPalette.Hover)] = palette.Hover,
+			[ColorKey(previousPalette.Group)] = palette.Group,
+			[ColorKey(previousPalette.Button)] = palette.Button,
+		}
+		ActivePalette = palette
+		local function recolor(color) return replacements[ColorKey(color)] or color end
+		Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+		Stroke.Color = palette.Accent
+		ThemeButton.BackgroundColor3 = palette.Group
+		ThemeButton.TextColor3 = palette.Light
+		ThemeButtonStroke.Color = palette.Accent
+		ThemePickerStroke.Color = palette.Accent
+		ThemeHeading.TextColor3 = palette.Light
+		for _, obj in ipairs(ScreenGui:GetDescendants()) do
+			if not obj:IsDescendantOf(ThemePicker) and obj ~= ThemeButton then
+				if obj:IsA("GuiObject") then
+					pcall(function() obj.BackgroundColor3 = recolor(obj.BackgroundColor3) end)
+					pcall(function() obj.TextColor3 = recolor(obj.TextColor3) end)
+					pcall(function() obj.ImageColor3 = recolor(obj.ImageColor3) end)
+					pcall(function() obj.ScrollBarImageColor3 = recolor(obj.ScrollBarImageColor3) end)
+				end
+				if obj:IsA("UIStroke") then obj.Color = recolor(obj.Color) end
+				if obj:IsA("UIGradient") then
+					local points = {}
+					for _, kp in ipairs(obj.Color.Keypoints) do
+						table.insert(points, ColorSequenceKeypoint.new(kp.Time, recolor(kp.Value)))
+					end
+					obj.Color = ColorSequence.new(points)
+				end
+			end
+		end
+		Line.BackgroundColor3 = palette.Accent
+		Side.ScrollBarImageColor3 = palette.Accent
+		for _, obj in ipairs(Pages:GetChildren()) do
+			if obj:IsA("ScrollingFrame") then obj.ScrollBarImageColor3 = palette.Accent end
+		end
+		if ConfirmStroke then ConfirmStroke.Color = palette.Accent end
+		if YesBtn then YesBtn.BackgroundColor3 = palette.Accent end
+	end
+
+	for order, data in ipairs({
+		{"Neon Purple", "PURPLE", Color3.fromRGB(190,70,255)},
+		{"Cyber Blue", "BLUE", Color3.fromRGB(0,170,255)},
+		{"Crimson Red", "RED", Color3.fromRGB(255,65,85)},
+		{"Matrix Green", "GREEN", Color3.fromRGB(40,220,130)},
+		{"Neon Pink", "PINK", Color3.fromRGB(255,70,180)},
+		{"Ice White", "ICE", Color3.fromRGB(130,210,255)},
+	}) do
+		local btn = Instance.new("TextButton")
+		btn.Name = data[1]:gsub("%s", "")
+		btn.Parent = ThemeGrid
+		btn.LayoutOrder = order
+		btn.BackgroundColor3 = Color3.fromRGB(28,28,35)
+		btn.Text = data[2]
+		btn.TextColor3 = Color3.fromRGB(245,245,245)
+		btn.Font = Enum.Font.GothamBold
+		btn.TextSize = 10
+		btn.AutoButtonColor = false
+		btn.ZIndex = 82
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+		local swatch = Instance.new("UIStroke", btn)
+		swatch.Color = data[3]
+		swatch.Thickness = 1.4
+		btn.MouseButton1Click:Connect(function()
+			LastPresetPalette = ThemePalettes[data[1]]
+			ApplyThemePalette(LastPresetPalette)
+		end)
+	end
+
+	ThemeButton.MouseButton1Click:Connect(function()
+		ThemePicker.Visible = not ThemePicker.Visible
+	end)
+
 	-- =========================
 	-- ADVANCED CLOSE CONFIRM
 	-- =========================
@@ -1673,7 +1847,7 @@ function KuoHub:MakeWindow(config)
 	ConfirmFrame.ClipsDescendants = true
 	Instance.new("UICorner", ConfirmFrame).CornerRadius = UDim.new(0,12)
 	
-	local ConfirmStroke = Instance.new("UIStroke")
+	ConfirmStroke = Instance.new("UIStroke")
 	ConfirmStroke.Parent = ConfirmFrame
 	ConfirmStroke.Color = Color3.fromRGB(190,70,255)
 	ConfirmStroke.Thickness = 2
@@ -1700,7 +1874,7 @@ function KuoHub:MakeWindow(config)
 	ConfirmText.TextColor3 = Color3.fromRGB(200,200,200)
 	ConfirmText.ZIndex = 1000
 	
-	local YesBtn = Instance.new("TextButton")
+	YesBtn = Instance.new("TextButton")
 	YesBtn.Parent = ConfirmFrame
 	YesBtn.Size = UDim2.new(0,90,0,30)
 	YesBtn.Position = UDim2.new(0,20,1,-40)
@@ -1819,6 +1993,47 @@ function KuoHub:MakeWindow(config)
 	-- =========================
 	local Window = {}
 	Window.LastMinimizePosition = nil
+
+	-- Public theme API: call these from a separate Settings tab.
+	local function BuildCustomPalette(r, g, b)
+		local accent = Color3.fromRGB(
+			math.clamp(math.floor(tonumber(r) or 190), 0, 255),
+			math.clamp(math.floor(tonumber(g) or 70), 0, 255),
+			math.clamp(math.floor(tonumber(b) or 255), 0, 255)
+		)
+		local function mix(a, b, t)
+			return Color3.new(a.R*(1-t)+b.R*t, a.G*(1-t)+b.G*t, a.B*(1-t)+b.B*t)
+		end
+		return {
+			Accent = accent,
+			Light = mix(accent, Color3.new(1,1,1), 0.42),
+			Dark = mix(accent, Color3.new(0,0,0), 0.45),
+			Selected = mix(accent, Color3.new(0,0,0), 0.55),
+			Hover = mix(accent, Color3.fromRGB(24,18,32), 0.72),
+			Group = mix(accent, Color3.fromRGB(15,15,15), 0.78),
+			Button = Color3.fromRGB(24,18,32),
+		}
+	end
+
+	function Window:SetCustomRGB(r, g, b)
+		CustomRGB = {
+			math.clamp(math.floor(tonumber(r) or 190), 0, 255),
+			math.clamp(math.floor(tonumber(g) or 70), 0, 255),
+			math.clamp(math.floor(tonumber(b) or 255), 0, 255),
+		}
+		if CustomThemeEnabled then
+			ApplyThemePalette(BuildCustomPalette(CustomRGB[1], CustomRGB[2], CustomRGB[3]))
+		end
+	end
+
+	function Window:SetCustomThemeEnabled(enabled)
+		CustomThemeEnabled = enabled == true
+		if CustomThemeEnabled then
+			ApplyThemePalette(BuildCustomPalette(CustomRGB[1], CustomRGB[2], CustomRGB[3]))
+		else
+			ApplyThemePalette(LastPresetPalette or ThemePalettes["Neon Purple"])
+		end
+	end
 	
 	-- Sidebar layout: consistent spacing and scroll support on phones
 	local function ReflowSide()
@@ -1849,7 +2064,7 @@ function KuoHub:MakeWindow(config)
 		Page.Size = UDim2.new(1,-150,1,-55)
 		Page.Position = UDim2.new(0,150,0,50)
 		Page.ScrollBarThickness = 4
-		Page.ScrollBarImageColor3 = Color3.fromRGB(190,70,255)
+		Page.ScrollBarImageColor3 = ActivePalette.Accent
 		Page.ScrollBarImageTransparency = 0.08
 		Page.Visible = false
 		Page.BackgroundTransparency = 1
@@ -1883,12 +2098,12 @@ function KuoHub:MakeWindow(config)
 		Btn.AutoButtonColor = false
 		Btn.MouseEnter:Connect(function()
 			if CurrentPage ~= Page then
-				TweenService:Create(Btn, TweenInfo.new(0.16), {BackgroundColor3 = Color3.fromRGB(48,25,64)}):Play()
+				TweenService:Create(Btn, TweenInfo.new(0.16), {BackgroundColor3 = ActivePalette.Hover}):Play()
 			end
 		end)
 		Btn.MouseLeave:Connect(function()
 			if CurrentPage ~= Page then
-				TweenService:Create(Btn, TweenInfo.new(0.16), {BackgroundColor3 = Color3.fromRGB(24,18,32)}):Play()
+				TweenService:Create(Btn, TweenInfo.new(0.16), {BackgroundColor3 = ActivePalette.Button}):Play()
 			end
 		end)
 		
@@ -1901,13 +2116,13 @@ function KuoHub:MakeWindow(config)
 			for _, other in ipairs(Side:GetChildren()) do
 				if other:IsA("TextButton") then
 					TweenService:Create(other, TweenInfo.new(0.16), {
-						BackgroundColor3 = Color3.fromRGB(24,18,32),
+						BackgroundColor3 = ActivePalette.Button,
 						TextColor3 = Color3.fromRGB(205,195,215)
 					}):Play()
 				end
 			end
 			TweenService:Create(Btn, TweenInfo.new(0.16), {
-				BackgroundColor3 = Color3.fromRGB(85,25,120),
+				BackgroundColor3 = ActivePalette.Selected,
 				TextColor3 = Color3.fromRGB(255,255,255)
 			}):Play()
 			Page.Visible = true
@@ -1945,7 +2160,7 @@ function KuoHub:MakeWindow(config)
 			Label.Size = UDim2.new(1,0,1,0)
 			Label.BackgroundTransparency = 1
 			Label.Text = text
-			Label.TextColor3 = Color3.fromRGB(190,70,255)
+			Label.TextColor3 = ActivePalette.Accent
 			Label.Font = Enum.Font.GothamBold
 			Label.TextSize = 16
 			Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -2019,7 +2234,7 @@ function KuoHub:MakeWindow(config)
 					Position = state and UDim2.new(1,-19,0.5,-9) or UDim2.new(0,1,0.5,-9)
 				}):Play()
 				TweenService:Create(ToggleFrame, TweenInfo.new(0.2), {
-					BackgroundColor3 = state and Color3.fromRGB(190,70,255) or Color3.fromRGB(60,60,60)
+					BackgroundColor3 = state and ActivePalette.Accent or Color3.fromRGB(60,60,60)
 				}):Play()
 			end
 			
@@ -2178,7 +2393,7 @@ function KuoHub:MakeWindow(config)
 			
 			local Fill = Instance.new("Frame", Bar)
 			Fill.Size = UDim2.new(0,0,1,0)
-			Fill.BackgroundColor3 = Color3.fromRGB(190,70,255)
+			Fill.BackgroundColor3 = ActivePalette.Accent
 			Instance.new("UICorner", Fill).CornerRadius = UDim.new(1,0)
 			
 			local Drag = Instance.new("TextButton", Bar)
@@ -2482,13 +2697,13 @@ function KuoHub:MakeWindow(config)
 		Header.Font = Enum.Font.GothamBold
 		Header.TextSize = 13
 		Header.TextColor3 = Color3.fromRGB(225,205,245)
-		Header.BackgroundColor3 = Color3.fromRGB(38,20,52)
+		Header.BackgroundColor3 = ActivePalette.Group
 		Header.AutoButtonColor = false
 		Header:SetAttribute("KuoHeight", 34)
 		Header:SetAttribute("KuoIndent", 6)
 		Instance.new("UICorner", Header).CornerRadius = UDim.new(0,9)
 		local line = Instance.new("UIStroke", Header)
-		line.Color = Color3.fromRGB(115,45,150)
+		line.Color = ActivePalette.Dark
 		line.Transparency = 0.45
 		line.Thickness = 1
 		Header.MouseButton1Click:Connect(function()
@@ -2509,7 +2724,7 @@ function KuoHub:MakeWindow(config)
 			tab._Button:SetAttribute("KuoIndent", 18)
 			tab._Button:SetAttribute("KuoHeight", 36)
 			tab._Button.Text = "   " .. tostring(subName)
-			tab._Button.BackgroundColor3 = Color3.fromRGB(24,18,32)
+			tab._Button.BackgroundColor3 = ActivePalette.Button
 			tab._Button.Visible = group.Expanded
 			tab._MainGroup = group
 			table.insert(group.Tabs, tab)
@@ -2804,5 +3019,6 @@ function KuoHub:MakeWindow(config)
 	
 	return Window
 end
+
 
 return KuoHub
