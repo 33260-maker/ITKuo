@@ -1606,11 +1606,17 @@ function KuoHub:MakeWindow(config)
 	Side.Position = UDim2.new(0,0,0,45)
 	Side.BackgroundTransparency = 1
 	Side.ClipsDescendants = true
-	Side.CanvasSize = UDim2.new(0,0,0,0)
-	Side.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	Side.Active = true
+	Side.ScrollingEnabled = true
 	Side.ScrollingDirection = Enum.ScrollingDirection.Y
-	Side.ScrollBarThickness = 3
+	Side.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
+	Side.CanvasPosition = Vector2.new(0, 0)
+	Side.CanvasSize = UDim2.new(0, 0, 0, 0)
+	-- CanvasSize is updated by ReflowSide so hidden nested tabs do not leave blank gaps.
+	Side.AutomaticCanvasSize = Enum.AutomaticSize.None
+	Side.ScrollBarThickness = 4
 	Side.ScrollBarImageColor3 = Color3.fromRGB(190,70,255)
+	Side.ScrollBarImageTransparency = 0.08
 	Side.BorderSizePixel = 0
 	
 	-- PAGES FOLDER
@@ -1816,16 +1822,25 @@ function KuoHub:MakeWindow(config)
 	
 	-- Sidebar layout: consistent spacing and scroll support on phones
 	local function ReflowSide()
+		-- Rebuild visible tab positions and the scrollable canvas after adding,
+		-- expanding, or collapsing a nested tab group.
 		local y = 8
 		for _, child in ipairs(Side:GetChildren()) do
 			if child:IsA("TextButton") and child.Visible then
 				local h = child:GetAttribute("KuoHeight") or 38
-				child.Position = UDim2.new(0, child:GetAttribute("KuoIndent") or 6, 0, y)
-				child.Size = UDim2.new(1, -(child:GetAttribute("KuoIndent") or 6) - 8, 0, h)
+				local indent = child:GetAttribute("KuoIndent") or 6
+				child.Position = UDim2.new(0, indent, 0, y)
+				child.Size = UDim2.new(1, -indent - 12, 0, h)
 				y += h + 6
 			end
 		end
-		Side.CanvasSize = UDim2.new(0,0,0,y+6)
+		local contentHeight = math.max(0, y + 2)
+		Side.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
+		-- If a group was collapsed, keep the scroll offset within the new canvas.
+		local maxY = math.max(0, contentHeight - Side.AbsoluteWindowSize.Y)
+		if Side.CanvasPosition.Y > maxY then
+			Side.CanvasPosition = Vector2.new(0, maxY)
+		end
 	end
 
 	function Window:Tab(name, skipAutoIcon)
@@ -1834,8 +1849,14 @@ function KuoHub:MakeWindow(config)
 		Page.Size = UDim2.new(1,-150,1,-55)
 		Page.Position = UDim2.new(0,150,0,50)
 		Page.ScrollBarThickness = 4
+		Page.ScrollBarImageColor3 = Color3.fromRGB(190,70,255)
+		Page.ScrollBarImageTransparency = 0.08
 		Page.Visible = false
 		Page.BackgroundTransparency = 1
+		Page.ClipsDescendants = true
+		Page.Active = true
+		Page.ScrollingEnabled = true
+		Page.ElasticBehavior = Enum.ElasticBehavior.WhenScrollable
 		Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
 		Page.ScrollingDirection = Enum.ScrollingDirection.Y
 		
