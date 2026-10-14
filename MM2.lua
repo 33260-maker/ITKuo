@@ -17,6 +17,8 @@ local Home = Window:Tab("Home")
 local Combat = Window:MakeTab({"Combat","sword"})  
 
 local Info = Window:MakeTab({"System","history"})
+
+local Setting = Window:MakeTab({"Setting", "Settings"})
   
 Home:Section("Main")  
   
@@ -60,6 +62,8 @@ local wasInvisibleBeforeWarp = false
 local SAFE_DISTANCE_GUN = 2  
 local GunESP = false  
 local Shot_AURA = false  
+local Custom = false
+local R, G, B = 190, 70, 255
   
 -- =========================  
 -- FLY  
@@ -2416,6 +2420,57 @@ applyInvisible(v)
 end  
 })  
 
+-- Toggle แยกต่างหากใน Tab Setting
+Setting:Toggle({
+    Title = "off/on Custom RGB",
+    Desc = "เปลื่ยนสีธีม",
+    Callback = function(v)
+        Custom = v
+        Window:SetCustomThemeEnabled(v)
+
+        if v then
+            Window:SetCustomRGB(R, G, B)
+        end
+    end
+})
+
+-- Slider สีแดง
+Setting:AddSlider({
+    Name = "Red (R)",
+    Min = 0,
+    Max = 255,
+    Default = R,
+    Callback = function(v)
+        R = v
+        Window:SetCustomRGB(R, G, B)
+    end
+})
+
+-- Slider สีเขียว
+Setting:AddSlider({
+    Name = "Green (G)",
+    Min = 0,
+    Max = 255,
+    Default = G,
+    Callback = function(v)
+        G = v
+        Window:SetCustomRGB(R, G, B)
+    end
+})
+
+-- Slider สีน้ำเงิน
+Setting:AddSlider({
+    Name = "Blue (B)",
+    Min = 0,
+    Max = 255,
+    Default = B,
+    Callback = function(v)
+        B = v
+        Window:SetCustomRGB(R, G, B)
+    end
+})
+
+
 Home:AddSlider({
 	Name = "Adjust walk speed",
 	Min = 16,
@@ -2466,6 +2521,6 @@ end
 -- KEY  
 UIS.InputBegan:Connect(function(i,g)  
 if not g and i.KeyCode == Enum.KeyCode.F then  
-setFly(not flying)  
+SetFly(not Flying)  
 end  
 end)
