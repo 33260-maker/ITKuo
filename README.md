@@ -1,2 +1,2 @@
 #kuo hub.lua
-Kuo Hub is a program that helps you play and supports various maps, such as 99 Nights in the Jungle, and it supports the Thai language and MM2,+1 speed keyboard.
+Kuo Hub is a program that helps you play and supports various maps, such as 99 Nights in the Jungle, and it supports the Thai language and MM2 +1 speed keyboard.
